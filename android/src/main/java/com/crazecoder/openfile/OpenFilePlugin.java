@@ -150,6 +150,8 @@ public class OpenFilePlugin implements MethodCallHandler, PluginRegistry.Request
                 return "text/plain";
             case "cpp":
                 return "text/plain";
+            case "csv":
+                return "text/comma-separated-values";
             case "doc":
                 return "application/msword";
             case "docx":
