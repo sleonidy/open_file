@@ -48,6 +48,16 @@ public class OpenFilePlugin implements MethodCallHandler, PluginRegistry.Request
         this.activity = activity;
     }
 
+    private void askForPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!hasPermissions()) {
+                ActivityCompat.requestPermissions(activity,
+                        PERMISSIONS,
+                        0);
+            }
+        }
+    }
+
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "open_file");
         OpenFilePlugin plugin = new OpenFilePlugin(registrar.context(), registrar.activity());
@@ -74,9 +84,14 @@ public class OpenFilePlugin implements MethodCallHandler, PluginRegistry.Request
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         if (call.method.equals("open_file")) {
-            filePath = call.argument("file_path").toString();
-            this.result = result;
-
+            askForPermission(activity);
+            String filePath = call.argument("file_path").toString();
+            File file = new File(filePath);
+            if (!file.exists()) {
+                result.success("the " + filePath + " file is not exists");
+                return;
+            }
+            String typeString;
             if (call.hasArgument("type") && call.argument("type") != null) {
                 typeString = call.argument("type").toString();
             } else {
